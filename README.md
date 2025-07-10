@@ -1,4 +1,4 @@
-<h1 align="center">📱 React Native X Clone Tutorial 🚀</h1>
+<h1 align="center">📱 React Native Twitter Clone  🚀</h1>
 
 ## 🧑‍🍳 App Features Overview
 
