@@ -1,1 +1,1 @@
-<h1>📱 React Native X Clone 🚀</h1>
+<h1 style={text-align:center;}>📱 React Native X Clone 🚀</h1>
