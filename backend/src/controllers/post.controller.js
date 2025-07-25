@@ -1,40 +1,45 @@
-import asyncHandler from "express-async-handler"
-import Post from "../models/post.model.js"
-import User from "../models/user.model.js"
-import { getAuth } from "@clerk/express"
-import cloudinary from "../config/cloudinary.js"
-import Notification from "../models/notification.model.js"
-import Comment from "../models/comment.model.js"
+import asyncHandler from "express-async-handler";
+import Post from "../models/post.model.js";
+import User from "../models/user.model.js";
+import { getAuth } from "@clerk/express";
+import cloudinary from "../config/cloudinary.js";
 
-export const getPosts = asyncHandler(async(req,res)=>{
-    const posts = await Post.find().sort({createdAt:-1}).populate("user","username firstName lastName profilePicture")
-        .populate({
-            path:"comments",
-            populate:{
-                path:"user",
-                select:"username firstName lastName profilePicture"
-            }
-        })
+import Notification from "../models/notification.model.js";
+import Comment from "../models/comment.model.js";
 
-    res.status(200).json({posts})
-})
+export const getPosts = asyncHandler(async (req, res) => {
+  const posts = await Post.find()
+    .sort({ createdAt: -1 })
+    .populate("user", "username firstName lastName profilePicture")
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    });
 
-export const getPost = asyncHandler(async(req,res)=>{
-    const {postId} = req.params
-    const post = await Post.findById(postId).populate("user","username firstName lastName profilePicture")
-        .populate({
-            path:"comments",
-            populate:{
-                path:"user",
-                select:"username firstName lastName profilePicture"
-            }
-        })
-    if(!post){
-        return res.status(404).json({error:"Post not found"})
-    }
+  res.status(200).json({ posts });
+});
 
-    res.status(200).json({post})
-})
+export const getPost = asyncHandler(async (req, res) => {
+  const { postId } = req.params;
+
+  const post = await Post.findById(postId)
+    .populate("user", "username firstName lastName profilePicture")
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    });
+
+  if (!post) return res.status(404).json({ error: "Post not found" });
+
+  res.status(200).json({ post });
+});
+
 export const getUserPosts = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
@@ -55,58 +60,55 @@ export const getUserPosts = asyncHandler(async (req, res) => {
   res.status(200).json({ posts });
 });
 
-export const createPost = asyncHandler(async(req,res)=>{
-    const {userId} = getAuth(req)
-    const {content} = req.body
-    const imageFile = req.file
+export const createPost = asyncHandler(async (req, res) => {
+  const { userId } = getAuth(req);
+  const { content } = req.body;
+  const imageFile = req.file;
 
-    if(!content && !imageFile){
-        return res.status(400).json({error:"Post must contain either text or image"})
+  if (!content && !imageFile) {
+    return res.status(400).json({ error: "Post must contain either text or image" });
+  }
+
+  const user = await User.findOne({ clerkId: userId });
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  let imageUrl = "";
+
+  // upload image to Cloudinary if provided
+  if (imageFile) {
+    try {
+      // convert buffer to base64 for cloudinary
+      const base64Image = `data:${imageFile.mimetype};base64,${imageFile.buffer.toString(
+        "base64"
+      )}`;
+
+      const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+        folder: "social_media_posts",
+        resource_type: "image",
+        transformation: [
+          { width: 800, height: 600, crop: "limit" },
+          { quality: "auto" },
+          { format: "auto" },
+        ],
+      });
+      imageUrl = uploadResponse.secure_url;
+    } catch (uploadError) {
+      console.error("Cloudinary upload error:", uploadError);
+      return res.status(400).json({ error: "Failed to upload image" });
     }
+  }
 
-    const user = User.findOne({clerkId:userId})
-    if(!user) return res.status(404).json({error:"User not found"})
+  const post = await Post.create({
+    user: user._id,
+    content: content || "",
+    image: imageUrl,
+  });
 
-    let imageUrl = ""
+  res.status(201).json({ post });
+});
 
-    if(imageFile){
-        try {
-            //convert buffer to base64 for cloudinart
-            const base64Image = `data:${imageFile.mimetype};base64,${imageFile.buffer.toString("base64")}`
-
-
-            const uploadResponse = await cloudinary.uploader.upload(base64Image,{
-                folder:"social_media_posts",
-                resource_type:"image",
-                transformation:[
-                    { width: 800, height: 800, crop: "limit" },
-                    { quality: "auto" },
-                {format:"auto"}]
-            })
-
-            imageUrl = uploadResponse.secure_url
-        } catch (error) {
-            console.log("Cloudianry upload error",error)
-            return res.status(400).json({error:"Image upload failed"})            
-        }
-    }
-
-    const post = await Post.create({
-        user:user._id,
-        content: content || "",
-        image:imageUrl
-    })
-
-    res.status(201).json({post})
-
-     
-
-
-
-})
-
-export const likePost = asyncHandler(async(req,res)=>{
-    const { userId } = getAuth(req);
+export const likePost = asyncHandler(async (req, res) => {
+  const { userId } = getAuth(req);
   const { postId } = req.params;
 
   const user = await User.findOne({ clerkId: userId });
@@ -141,15 +143,14 @@ export const likePost = asyncHandler(async(req,res)=>{
   res.status(200).json({
     message: isLiked ? "Post unliked successfully" : "Post liked successfully",
   });
+});
 
-})
+export const deletePost = asyncHandler(async (req, res) => {
+  const { userId } = getAuth(req);
+  const { postId } = req.params;
 
-export const deletePost = asyncHandler(async(req,res)=>{
-    const { userId } = getAuth(req);
-    const { postId } = req.params;
-
-    const user = await User.findOne({ clerkId: userId });
-    const post = await Post.findById(postId);
+  const user = await User.findOne({ clerkId: userId });
+  const post = await Post.findById(postId);
 
   if (!user || !post) return res.status(404).json({ error: "User or post not found" });
 
@@ -157,9 +158,11 @@ export const deletePost = asyncHandler(async(req,res)=>{
     return res.status(403).json({ error: "You can only delete your own posts" });
   }
 
+  // delete all comments on this post
   await Comment.deleteMany({ post: postId });
 
+  // delete the post
   await Post.findByIdAndDelete(postId);
 
   res.status(200).json({ message: "Post deleted successfully" });
-})
+});
