@@ -25,7 +25,7 @@ app.get("/",(req,res)=>res.send("Hello world"))
 
 
 app.use("/api/users",userRoutes)
-app.use("/api/post",postRoutes)
+app.use("/api/posts",postRoutes)
 app.use("/api/comments",commentRoutes)
 app.use("/api/notification",notificationRoutes)
 
@@ -34,9 +34,6 @@ app.use((err,req,res,next)=>{
     console.error("Unhandled error",err)
     res.status(500).json({error:err.message || "Internal Server Error"})
 })
-
-
-
 
 
 

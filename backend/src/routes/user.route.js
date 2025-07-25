@@ -7,7 +7,7 @@ const router = expess.Router()
 
 router.get("/profile/:username",getUserProfile);
 
-router.get("/sync",protectRoute,syncUser)
+router.post("/sync",protectRoute,syncUser)
 router.get("/me",protectRoute,getCurrentUser)
 router.get("/profile",protectRoute,updateProfile)
 router.get("/follow/:targetUserId",protectRoute,followUser)
