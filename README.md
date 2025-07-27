@@ -23,6 +23,13 @@
 - 📦 Connect everything in a real deployment setup
 
 ---
+## 🐦 New Things For Me........
+
+- 🔄 Manage data fetching & caching with TanStack Query
+- 🛡️ Add rate-limiting, bot detection & security with **Arcjet**
+
+
+---
 
 ## 📁 .env Setup
 
