@@ -27,7 +27,7 @@ app.get("/",(req,res)=>res.send("Hello world"))
 app.use("/api/users",userRoutes)
 app.use("/api/posts",postRoutes)
 app.use("/api/comments",commentRoutes)
-app.use("/api/notification",notificationRoutes)
+app.use("/api/notifications",notificationRoutes)
 
 // error handling middleware
 app.use((err,req,res,next)=>{
