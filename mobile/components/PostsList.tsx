@@ -1,28 +1,50 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { usePosts } from '@/hooks/usePosts'
-import { Post } from '@/types'
-import PostCard from './PostCard'
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useState } from "react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { usePosts } from "@/hooks/usePosts";
+import { Post } from "@/types";
+import PostCard from "./PostCard";
+import CommentsModal from "./CommentsModal";
 
 const PostsList = () => {
-  const {currentUser} = useCurrentUser()
-  const {isLoading,posts,error,refetch,toggleLike,deletePost,checkIsLiked} = usePosts()
+  const { currentUser } = useCurrentUser();
+  const {
+    isLoading,
+    posts,
+    error,
+    refetch,
+    toggleLike,
+    deletePost,
+    checkIsLiked,
+  } = usePosts();
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
+  const selectedPost = selectedPostId
+    ? posts.find((p: Post) => p._id === selectedPostId)
+    : null;
 
-  if(isLoading){
+  if (isLoading) {
     return (
-      <View className='p-8 items-center'>
-        <ActivityIndicator size={"large"} color={"#1DA1F2"}/>
-        <Text className='text-gray-500 mt-2'>Loading posts...</Text>
+      <View className="p-8 items-center">
+        <ActivityIndicator size={"large"} color={"#1DA1F2"} />
+        <Text className="text-gray-500 mt-2">Loading posts...</Text>
       </View>
-    )
+    );
   }
   if (error) {
     return (
       <View className="p-8 items-center">
         <Text className="text-gray-500 mb-4">Failed to load posts</Text>
-        <TouchableOpacity className="bg-blue-500 px-4 py-2 rounded-lg" onPress={() => refetch()}>
+        <TouchableOpacity
+          className="bg-blue-500 px-4 py-2 rounded-lg"
+          onPress={() => refetch()}
+        >
           <Text className="text-white font-semibold">Retry</Text>
         </TouchableOpacity>
       </View>
@@ -38,15 +60,23 @@ const PostsList = () => {
   }
   return (
     <>
-      {
-        posts.map((post:Post)=>(
-          <PostCard key={post._id} post={post} onLike={toggleLike} onDelete={deletePost} currentUser={currentUser} isLiked={checkIsLiked(post.likes,currentUser)}/>
-        ))
-      }
+      {posts.map((post: Post) => (
+        <PostCard
+          key={post._id}
+          post={post}
+          onLike={toggleLike}
+          onDelete={deletePost}
+          onComment = {(post:Post)=>setSelectedPostId(post._id)}
+          currentUser={currentUser}
+          isLiked={checkIsLiked(post.likes, currentUser)}
+        />
+      ))}
+
+      <CommentsModal selectedPost={selectedPost} onClose = {()=>setSelectedPostId(null)}/>
     </>
-  )
-}
+  );
+};
 
-export default PostsList
+export default PostsList;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
