@@ -27,6 +27,8 @@
 - 🔄 Manage data fetching & caching with TanStack Query
 - 🛡️ Add rate-limiting, bot detection & security with **Arcjet**
 - 🧼 Write reusable custom hooks to keep code clean and modular
+- ⚙️ Handle async errors efficiently using express-async-handler
+- 📡 Use Axios interceptors for token handling & error control
 
 
 ---
