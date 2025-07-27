@@ -22,11 +22,11 @@
 - 🧪 Use **Git & GitHub** in real-world team workflow (PRs & branches)
 - 📦 Connect everything in a real deployment setup
 
----
 ## 🐦 New Things For Me........
 
 - 🔄 Manage data fetching & caching with TanStack Query
 - 🛡️ Add rate-limiting, bot detection & security with **Arcjet**
+- 🧼 Write reusable custom hooks to keep code clean and modular
 
 
 ---
