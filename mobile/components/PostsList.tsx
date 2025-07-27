@@ -12,7 +12,7 @@ import { Post } from "@/types";
 import PostCard from "./PostCard";
 import CommentsModal from "./CommentsModal";
 
-const PostsList = () => {
+const PostsList = ({username}:{username?:string}) => {
   const { currentUser } = useCurrentUser();
   const {
     isLoading,
@@ -22,7 +22,7 @@ const PostsList = () => {
     toggleLike,
     deletePost,
     checkIsLiked,
-  } = usePosts();
+  } = usePosts(username);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   const selectedPost = selectedPostId

@@ -12,7 +12,7 @@ const NotificationScreen = () => {
   const insets = useSafeAreaInsets()
 
 
-  if(error ){
+  if(error){
     return(
       <View className='flex-1 items-center justify-center p-8'>
         <Text className='text-gray-500 mb-4'>
